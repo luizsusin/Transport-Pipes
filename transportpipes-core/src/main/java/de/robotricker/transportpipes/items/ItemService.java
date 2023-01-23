@@ -270,10 +270,18 @@ public class ItemService {
     }
 
     public static boolean isFurnaceBurnableItem(BlockState blockState, ItemStack item) {
-
         Iterator<Recipe> recipeIt = Bukkit.recipeIterator();
         while (recipeIt.hasNext()) {
-            Recipe recipe = recipeIt.next();
+            Recipe recipe = null;
+            
+            try {
+                recipe = recipeIt.next();
+            }
+            catch(Exception e) { return false; }
+
+            if(recipe == null)
+                continue;
+
             if (blockState instanceof BlastFurnace) {
                 if (!(recipe instanceof BlastingRecipe)) continue;
                 if (!((BlastingRecipe) recipe).getInputChoice().test(item)) continue;
