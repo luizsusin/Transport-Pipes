@@ -77,10 +77,12 @@ public abstract class RenderSystem {
         if (baseDuctType.getVanillaRenderSystem() != null && VanillaRenderSystem.getDisplayName().equalsIgnoreCase(renderSystemName)) {
             return baseDuctType.getVanillaRenderSystem();
         }
-        if (baseDuctType.getModelledRenderSystem() != null && ModelledRenderSystem.getDisplayName().equalsIgnoreCase(renderSystemName)) {
+        
+        /*if (baseDuctType.getModelledRenderSystem() != null && ModelledRenderSystem.getDisplayName().equalsIgnoreCase(renderSystemName)) {
             return baseDuctType.getModelledRenderSystem();
-        }
-        return null;
+        }*/
+        
+        return baseDuctType.getModelledRenderSystem();
     }
 
     public static String getLocalizedRenderSystemName(String renderSystemName) {
