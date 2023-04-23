@@ -19,14 +19,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class FakeBlock_1_19_3 extends FakeBlock implements Block {
+public class FakeBlock_1_19_4 extends FakeBlock implements Block {
 
-    public FakeBlock_1_19_3(World world, Location location, Material material) {
+    public FakeBlock_1_19_4(World world, Location location, Material material) {
         this.world = world;
         this.location = location;
         this.material = Material.HOPPER;
         this.blockData = this.material.createBlockData();
-        this.hopper = new FakeHopper_1_19_3(world, location, this);
+        this.hopper = new FakeHopper_1_19_4(world, location, this);
     }
 
     public BlockState getState(boolean ignoredUseSnapshot) {
