@@ -10,7 +10,7 @@
     <parent>
         <groupId>de.robotricker</groupId>
         <artifactId>transportpipes-parent</artifactId>
-        <version>5.4.4-SNAPSHOT</version>
+        <version>5.4.5-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -66,6 +66,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>transportpipes-1_19_3</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>transportpipes-1_19_4</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
