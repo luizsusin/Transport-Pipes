@@ -137,4 +137,3 @@ buildNumber.properties
 ### Git ###
 # Don't exclude the .gitignore itself
 !.gitignore
-.vscode/settings.json
