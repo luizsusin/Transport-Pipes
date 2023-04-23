@@ -48,7 +48,7 @@ public class ItemService {
         Objects.requireNonNull(meta).setCustomModelData(133744);
         wrench.setItemMeta(meta);
         tempConf = new YamlConfiguration();
-        
+
         this.transportPipes = transportPipes;
     }
 
@@ -59,7 +59,8 @@ public class ItemService {
     public boolean isWrench(ItemStack item) {
         if (item != null && item.hasItemMeta()) {
             ItemMeta meta = item.getItemMeta();
-            if (Objects.requireNonNull(meta).hasDisplayName() && meta.getDisplayName().equals(LangConf.Key.WRENCH.getLines().get(0))) {
+            if (Objects.requireNonNull(meta).hasDisplayName()
+                    && meta.getDisplayName().equals(LangConf.Key.WRENCH.getLines().get(0))) {
                 if (!meta.hasCustomModelData() || meta.getCustomModelData() != 133744) {
                     meta.setCustomModelData(133744);
                     item.setItemMeta(meta);
@@ -73,7 +74,7 @@ public class ItemService {
     public ItemStack createModelledItem(int damage) {
         ItemStack woodenPickaxe = new ItemStack(Material.WOODEN_PICKAXE);
         ItemMeta meta = woodenPickaxe.getItemMeta();
-        
+
         Objects.requireNonNull(meta).setCustomModelData(133700 + damage);
 
         ((Damageable) meta).setDamage(damage);
@@ -129,13 +130,15 @@ public class ItemService {
 
     public ItemStack createHeadItem(String uuid, String textureValue, String textureSignature) {
         WrappedGameProfile wrappedProfile = new WrappedGameProfile(UUID.fromString(uuid), uuid);
-        wrappedProfile.getProperties().put("textures", new WrappedSignedProperty("textures", textureValue, textureSignature));
+        wrappedProfile.getProperties().put("textures",
+                new WrappedSignedProperty("textures", textureValue, textureSignature));
 
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
         Objects.requireNonNull(skullMeta).setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(uuid)));
 
-        FieldAccessor accessor = Accessors.getFieldAccessorOrNull(skullMeta.getClass(), "profile", wrappedProfile.getHandle().getClass());
+        FieldAccessor accessor = Accessors.getFieldAccessorOrNull(skullMeta.getClass(), "profile",
+                wrappedProfile.getHandle().getClass());
         if (accessor != null) {
             accessor.set(skullMeta, wrappedProfile.getHandle());
         }
@@ -148,7 +151,8 @@ public class ItemService {
         ItemMeta itemMeta = item.getItemMeta();
         if (itemMeta != null) {
             PersistentDataContainer container = itemMeta.getPersistentDataContainer();
-            container.set(new NamespacedKey(transportPipes, "basicDuctType"), PersistentDataType.STRING, dt.getBaseDuctType().getName());
+            container.set(new NamespacedKey(transportPipes, "basicDuctType"), PersistentDataType.STRING,
+                    dt.getBaseDuctType().getName());
             container.set(new NamespacedKey(transportPipes, "ductType"), PersistentDataType.STRING, dt.getName());
             item.setItemMeta(itemMeta);
         }
@@ -158,9 +162,11 @@ public class ItemService {
     public DuctType readDuctTags(ItemStack item, DuctRegister ductRegister) {
         ItemMeta itemMeta = item.getItemMeta();
         if (itemMeta != null) {
-            String basicDuctTypeSerialized = item.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(transportPipes, "basicDuctType"), PersistentDataType.STRING);
+            String basicDuctTypeSerialized = item.getItemMeta().getPersistentDataContainer()
+                    .get(new NamespacedKey(transportPipes, "basicDuctType"), PersistentDataType.STRING);
             BaseDuctType<? extends Duct> bdt = ductRegister.baseDuctTypeOf(basicDuctTypeSerialized);
-            String ductTypeSerialized = item.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(transportPipes, "ductType"), PersistentDataType.STRING);
+            String ductTypeSerialized = item.getItemMeta().getPersistentDataContainer()
+                    .get(new NamespacedKey(transportPipes, "ductType"), PersistentDataType.STRING);
             if (ductTypeSerialized != null && !ductTypeSerialized.isEmpty()) {
                 return bdt.ductTypeOf(ductTypeSerialized);
             }
@@ -180,7 +186,8 @@ public class ItemService {
     public ItemStack createWildcardItem(Material material) {
         ItemStack glassPane = new ItemStack(material);
         ItemMeta meta = glassPane.getItemMeta();
-        Objects.requireNonNull(meta).getPersistentDataContainer().set(new NamespacedKey(transportPipes, "wildcard"), PersistentDataType.INTEGER, 1);
+        Objects.requireNonNull(meta).getPersistentDataContainer().set(new NamespacedKey(transportPipes, "wildcard"),
+                PersistentDataType.INTEGER, 1);
         glassPane.setItemMeta(meta);
         return changeDisplayNameAndLore(glassPane, ChatColor.RESET.toString());
     }
@@ -188,7 +195,8 @@ public class ItemService {
     public ItemStack createBarrierItem() {
         ItemStack barrier = new ItemStack(Material.BARRIER);
         ItemMeta meta = barrier.getItemMeta();
-        Objects.requireNonNull(meta).getPersistentDataContainer().set(new NamespacedKey(transportPipes, "barrier"), PersistentDataType.INTEGER, 1);
+        Objects.requireNonNull(meta).getPersistentDataContainer().set(new NamespacedKey(transportPipes, "barrier"),
+                PersistentDataType.INTEGER, 1);
         barrier.setItemMeta(meta);
         return changeDisplayNameAndLore(barrier, ChatColor.RESET.toString());
     }
@@ -214,8 +222,10 @@ public class ItemService {
                 case PURPLE_STAINED_GLASS_PANE:
                 case BARRIER:
                     if (item.hasItemMeta() && Objects.requireNonNull(item.getItemMeta()).hasDisplayName()) {
-                        return item.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(transportPipes, "wildcard"), PersistentDataType.INTEGER)
-                                || item.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(transportPipes,  "barrier"), PersistentDataType.INTEGER);
+                        return item.getItemMeta().getPersistentDataContainer()
+                                .has(new NamespacedKey(transportPipes, "wildcard"), PersistentDataType.INTEGER)
+                                || item.getItemMeta().getPersistentDataContainer()
+                                        .has(new NamespacedKey(transportPipes, "barrier"), PersistentDataType.INTEGER);
                     }
                 default:
                     return false;
@@ -243,7 +253,8 @@ public class ItemService {
     }
 
     @SuppressWarnings("unchecked")
-    public ShapedRecipe createShapedRecipe(TransportPipes transportPipes, String recipeKey, ItemStack resultItem, String[] shape, Object... ingredientMap) {
+    public ShapedRecipe createShapedRecipe(TransportPipes transportPipes, String recipeKey, ItemStack resultItem,
+            String[] shape, Object... ingredientMap) {
         ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(transportPipes, recipeKey), resultItem);
         recipe.shape(shape);
         for (int i = 0; i < ingredientMap.length; i += 2) {
@@ -251,13 +262,15 @@ public class ItemService {
             if (ingredientMap[i + 1] instanceof Material) {
                 recipe.setIngredient(c, (Material) ingredientMap[i + 1]);
             } else {
-                recipe.setIngredient(c, new RecipeChoice.MaterialChoice(new ArrayList<>(((Collection<Material>) ingredientMap[i + 1]))));
+                recipe.setIngredient(c, new RecipeChoice.MaterialChoice(
+                        new ArrayList<>(((Collection<Material>) ingredientMap[i + 1]))));
             }
         }
         return recipe;
     }
 
-    public ShapelessRecipe createShapelessRecipe(TransportPipes transportPipes, String recipeKey, ItemStack resultItem, Material... ingredients) {
+    public ShapelessRecipe createShapelessRecipe(TransportPipes transportPipes, String recipeKey, ItemStack resultItem,
+            Material... ingredients) {
         ShapelessRecipe recipe = new ShapelessRecipe(new NamespacedKey(transportPipes, recipeKey), resultItem);
         for (int i = 0; i < ingredients.length; i += 2) {
             recipe.addIngredient(ingredients[i]);
@@ -273,26 +286,31 @@ public class ItemService {
         Iterator<Recipe> recipeIt = Bukkit.recipeIterator();
         while (recipeIt.hasNext()) {
             Recipe recipe = null;
-            
+
             try {
                 recipe = recipeIt.next();
+            } catch (Exception e) {
+                return false;
             }
-            catch(Exception e) { return false; }
 
-            if(recipe == null)
+            if (recipe == null)
                 continue;
 
             if (blockState instanceof BlastFurnace) {
-                if (!(recipe instanceof BlastingRecipe)) continue;
-                if (!((BlastingRecipe) recipe).getInputChoice().test(item)) continue;
-            }
-            else if (blockState instanceof Smoker) {
-                if (!(recipe instanceof SmokingRecipe)) continue;
-                if (!((SmokingRecipe) recipe).getInputChoice().test(item)) continue;
-            }
-            else {
-                if (!(recipe instanceof FurnaceRecipe)) continue;
-                if(!((FurnaceRecipe) recipe).getInputChoice().test(item)) continue;
+                if (!(recipe instanceof BlastingRecipe))
+                    continue;
+                if (!((BlastingRecipe) recipe).getInputChoice().test(item))
+                    continue;
+            } else if (blockState instanceof Smoker) {
+                if (!(recipe instanceof SmokingRecipe))
+                    continue;
+                if (!((SmokingRecipe) recipe).getInputChoice().test(item))
+                    continue;
+            } else {
+                if (!(recipe instanceof FurnaceRecipe))
+                    continue;
+                if (!((FurnaceRecipe) recipe).getInputChoice().test(item))
+                    continue;
             }
             return true;
         }

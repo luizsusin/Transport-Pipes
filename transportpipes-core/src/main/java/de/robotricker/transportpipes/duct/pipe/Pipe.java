@@ -31,22 +31,28 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class Pipe extends Duct {
 
 	/**
-	 * THREAD-SAFE contains all the items that are inside this pipe and should be updated
+	 * THREAD-SAFE contains all the items that are inside this pipe and should be
+	 * updated
 	 */
 	private final ConcurrentLinkedQueue<PipeItem> items;
 	/**
-	 * THREAD-SAFE contains all the items that are just put inside this pipe and should be updated and put into the
+	 * THREAD-SAFE contains all the items that are just put inside this pipe and
+	 * should be updated and put into the
 	 * items list the next tick
 	 */
 	private final ConcurrentLinkedQueue<PipeItem> futureItems;
 
 	/**
-	 * THREAD-SAFE contains all the items that could not be put into the next pipe or container because it is inside an
-	 * unloaded chunk. As the next pipe / container gets loaded again, these items get put into it one by one.
+	 * THREAD-SAFE contains all the items that could not be put into the next pipe
+	 * or container because it is inside an
+	 * unloaded chunk. As the next pipe / container gets loaded again, these items
+	 * get put into it one by one.
 	 * <p />
 	 * <p />
-	 * This means that all the pipeItems inside this list have got a blockLocation which differs from this pipe's
-	 * blockLocation. The blockLocation of one of these pipeItems may be pointing on a container block or on a different
+	 * This means that all the pipeItems inside this list have got a blockLocation
+	 * which differs from this pipe's
+	 * blockLocation. The blockLocation of one of these pipeItems may be pointing on
+	 * a container block or on a different
 	 * pipe.
 	 */
 	private final ConcurrentLinkedDeque<PipeItem> unloadedItems;
@@ -54,7 +60,8 @@ public class Pipe extends Duct {
 	final ItemDistributorService itemDistributor;
 	private final ConcurrentHashMap<TPDirection, TransportPipesContainer> connectedContainers;
 
-	public Pipe(DuctType ductType, BlockLocation blockLoc, World world, Chunk chunk, DuctSettingsInventory settingsInv, GlobalDuctManager globalDuctManager, ItemDistributorService itemDistributor) {
+	public Pipe(DuctType ductType, BlockLocation blockLoc, World world, Chunk chunk, DuctSettingsInventory settingsInv,
+			GlobalDuctManager globalDuctManager, ItemDistributorService itemDistributor) {
 		super(ductType, blockLoc, world, chunk, settingsInv, globalDuctManager);
 		this.items = new ConcurrentLinkedQueue<>();
 		this.futureItems = new ConcurrentLinkedQueue<>();
@@ -70,7 +77,7 @@ public class Pipe extends Duct {
 
 	@Override
 	public TreeSet<TPDirection> getAllConnections() {
-	    TreeSet<TPDirection> allConnections = super.getAllConnections();
+		TreeSet<TPDirection> allConnections = super.getAllConnections();
 		allConnections.addAll(getContainerConnections().keySet());
 		return allConnections;
 	}
@@ -96,52 +103,55 @@ public class Pipe extends Duct {
 	}
 
 	@Override
-	public void tick(boolean bigTick, TransportPipes transportPipes, DuctManager<? extends Duct> ductManager, GeneralConf generalConf) {
+	public void tick(boolean bigTick, TransportPipes transportPipes, DuctManager<? extends Duct> ductManager,
+			GeneralConf generalConf) {
 		super.tick(bigTick, transportPipes, ductManager, generalConf);
 
-        // activate futureItems
-        Iterator<PipeItem> futureItemsIt = getFutureItems().iterator();
-        outer: while (futureItemsIt.hasNext()) {
-            PipeItem futureItem = futureItemsIt.next();
-            if (generalConf.getMergePipeItems()) {
-                for (PipeItem nextPipeItem : getItems()) {
-                    if (nextPipeItem.getItem().isSimilar(futureItem.getItem()) && nextPipeItem.getMovingDir() == futureItem.getMovingDir()) {
-                        nextPipeItem.getItem().setAmount(nextPipeItem.getItem().getAmount() + futureItem.getItem().getAmount());
-                        int difference = nextPipeItem.getItem().getAmount() - nextPipeItem.getItem().getMaxStackSize();
-                        if (difference <= 0) {
-                            ((PipeManager) ductManager).despawnPipeItem(futureItem);
-                            futureItemsIt.remove();
-                            continue outer;
-                        }
-                        else {
-                            nextPipeItem.getItem().setAmount(nextPipeItem.getItem().getMaxStackSize());
-                            futureItem.getItem().setAmount(difference);
-                        }
-                    }
-                }
-            }
-            getItems().add(futureItem);
-            futureItemsIt.remove();
-        }
+		// activate futureItems
+		Iterator<PipeItem> futureItemsIt = getFutureItems().iterator();
+		outer: while (futureItemsIt.hasNext()) {
+			PipeItem futureItem = futureItemsIt.next();
+			if (generalConf.getMergePipeItems()) {
+				for (PipeItem nextPipeItem : getItems()) {
+					if (nextPipeItem.getItem().isSimilar(futureItem.getItem())
+							&& nextPipeItem.getMovingDir() == futureItem.getMovingDir()) {
+						nextPipeItem.getItem()
+								.setAmount(nextPipeItem.getItem().getAmount() + futureItem.getItem().getAmount());
+						int difference = nextPipeItem.getItem().getAmount() - nextPipeItem.getItem().getMaxStackSize();
+						if (difference <= 0) {
+							((PipeManager) ductManager).despawnPipeItem(futureItem);
+							futureItemsIt.remove();
+							continue outer;
+						} else {
+							nextPipeItem.getItem().setAmount(nextPipeItem.getItem().getMaxStackSize());
+							futureItem.getItem().setAmount(difference);
+						}
+					}
+				}
+			}
+			getItems().add(futureItem);
+			futureItemsIt.remove();
+		}
 
 		// extract items from unloaded list and put into next pipe
 		if (bigTick) {
-            if (!getUnloadedItems().isEmpty()) {
-                PipeItem unloadedItem = getUnloadedItems().getLast();
-                Duct newPipe = globalDuctManager.getDuctAtLoc(getWorld(), unloadedItem.getBlockLoc());
-                if (newPipe instanceof Pipe && newPipe.isInLoadedChunk()) {
-                    ((Pipe) newPipe).getItems().add(unloadedItem);
-                    getUnloadedItems().removeLast();
-                }
-            }
+			if (!getUnloadedItems().isEmpty()) {
+				PipeItem unloadedItem = getUnloadedItems().getLast();
+				Duct newPipe = globalDuctManager.getDuctAtLoc(getWorld(), unloadedItem.getBlockLoc());
+				if (newPipe instanceof Pipe && newPipe.isInLoadedChunk()) {
+					((Pipe) newPipe).getItems().add(unloadedItem);
+					getUnloadedItems().removeLast();
+				}
+			}
 		}
 
 	}
 
 	@Override
-	public void postTick(boolean bigTick, TransportPipes transportPipes, DuctManager<? extends Duct> ductManager, GeneralConf generalConf) {
+	public void postTick(boolean bigTick, TransportPipes transportPipes, DuctManager<? extends Duct> ductManager,
+			GeneralConf generalConf) {
 		super.postTick(bigTick, transportPipes, ductManager, generalConf);
-        
+
 		PipeManager pipeManager = (PipeManager) ductManager;
 		if (items.size() > generalConf.getMaxItemsPerPipe()) {
 			transportPipes.runTaskAsync(() -> {
@@ -154,13 +164,14 @@ public class Pipe extends Duct {
 			return;
 		}
 
-        List<PipeItem> copiedItems = new ArrayList<>(items);
+		List<PipeItem> copiedItems = new ArrayList<>(items);
 
 		for (int i = copiedItems.size() - 1; i >= 0; i--) {
 			PipeItem pipeItem = copiedItems.get(i);
 
 			long factor = (long) (getPipeItemSpeed() * RelativeLocation.PRECISION);
-			pipeItem.getRelativeLocation().add(pipeItem.getMovingDir().getX() * factor, pipeItem.getMovingDir().getY() * factor, pipeItem.getMovingDir().getZ() * factor);
+			pipeItem.getRelativeLocation().add(pipeItem.getMovingDir().getX() * factor,
+					pipeItem.getMovingDir().getY() * factor, pipeItem.getMovingDir().getZ() * factor);
 			pipeManager.updatePipeItemPosition(pipeItem);
 			pipeItem.resetOldRelativeLocation();
 
@@ -174,29 +185,31 @@ public class Pipe extends Duct {
 				Map<TPDirection, Integer> distribution = null;
 
 				try {
-					distribution = calculateItemDistribution(pipeItem, pipeItem.getMovingDir(), possibleMovingDirs, transportPipes);
+					distribution = calculateItemDistribution(pipeItem, pipeItem.getMovingDir(), possibleMovingDirs,
+							transportPipes);
+				} catch (ConcurrentModificationException e) {
 				}
-				catch(ConcurrentModificationException e) { }
 
 				if (distribution == null || distribution.isEmpty()) {
 					if (distribution != null) {
 						transportPipes.runTaskSync(() -> {
 							pipeItem.removeMovedDir(getBlockLoc());
-                            Map<TPDirection, Integer> newDistribution = calculateItemDistribution(pipeItem, pipeItem.getMovingDir(), possibleMovingDirs, transportPipes);
-                            if (newDistribution.isEmpty()) {
-                                pipeItem.setMovingDir(pipeItem.getMovingDir().getOpposite());
-                            }
-                            else {
-                                pipeItem.addMovedDir(getBlockLoc(), pipeItem.getMovingDir().getOpposite());
-                            }
+							Map<TPDirection, Integer> newDistribution = calculateItemDistribution(pipeItem,
+									pipeItem.getMovingDir(), possibleMovingDirs, transportPipes);
+							if (newDistribution.isEmpty()) {
+								pipeItem.setMovingDir(pipeItem.getMovingDir().getOpposite());
+							} else {
+								pipeItem.addMovedDir(getBlockLoc(), pipeItem.getMovingDir().getOpposite());
+							}
 						});
-					}
-					else {
-                        items.remove(pipeItem);
-                        pipeManager.despawnPipeItem(pipeItem);
-                        // drop item
-                        //transportPipes.runTaskSync(() -> pipeItem.getWorld().dropItem(pipeItem.getBlockLoc().getNeighbor(pipeItem.getMovingDir()).toLocation(pipeItem.getWorld()), pipeItem.getItem()));
-    					continue;
+					} else {
+						items.remove(pipeItem);
+						pipeManager.despawnPipeItem(pipeItem);
+						// drop item
+						// transportPipes.runTaskSync(() ->
+						// pipeItem.getWorld().dropItem(pipeItem.getBlockLoc().getNeighbor(pipeItem.getMovingDir()).toLocation(pipeItem.getWorld()),
+						// pipeItem.getItem()));
+						continue;
 					}
 				}
 
@@ -208,8 +221,7 @@ public class Pipe extends Duct {
 					int amount = distribution.get(dir);
 					if (tempPipeItem == null) {
 						tempPipeItem = pipeItem;
-					}
-					else {
+					} else {
 						tempPipeItem = new PipeItem(itemStack.clone(), getWorld(), location, dir);
 					}
 					tempPipeItem.getItem().setAmount(amount);
@@ -222,13 +234,17 @@ public class Pipe extends Duct {
 						pipeManager.spawnPipeItem(tempPipeItem);
 					}
 				}
-			}
-			else if (pipeItem.getRelativeLocation().getDoubleX() <= 0d || pipeItem.getRelativeLocation().getDoubleY() <= 0d || pipeItem.getRelativeLocation().getDoubleZ() <= 0d
-					|| pipeItem.getRelativeLocation().getDoubleX() >= 1d || pipeItem.getRelativeLocation().getDoubleY() >= 1d || pipeItem.getRelativeLocation().getDoubleZ() >= 1d) {
+			} else if (pipeItem.getRelativeLocation().getDoubleX() <= 0d
+					|| pipeItem.getRelativeLocation().getDoubleY() <= 0d
+					|| pipeItem.getRelativeLocation().getDoubleZ() <= 0d
+					|| pipeItem.getRelativeLocation().getDoubleX() >= 1d
+					|| pipeItem.getRelativeLocation().getDoubleY() >= 1d
+					|| pipeItem.getRelativeLocation().getDoubleZ() >= 1d) {
 				// arrival at end of pipe
 
 				Duct duct = getDuctConnections().get(pipeItem.getMovingDir());
-				TransportPipesContainer transportPipesContainer = getContainerConnections().get(pipeItem.getMovingDir());
+				TransportPipesContainer transportPipesContainer = getContainerConnections()
+						.get(pipeItem.getMovingDir());
 
 				if (duct instanceof Pipe pipe) {
 
@@ -247,12 +263,10 @@ public class Pipe extends Duct {
 					items.remove(pipeItem);
 					if (pipe.isInLoadedChunk()) {
 						pipe.putPipeItem(pipeItem);
-					}
-					else {
+					} else {
 						unloadedItems.add(pipeItem);
 					}
-				}
-				else {
+				} else {
 					items.remove(pipeItem);
 					pipeManager.despawnPipeItem(pipeItem);
 
@@ -265,7 +279,8 @@ public class Pipe extends Duct {
 						transportPipes.runTaskSync(() -> {
 							if (transportPipesContainer.isInLoadedChunk()) {
 
-								ItemStack overflow = transportPipesContainer.insertItem(pipeItem.getMovingDir(), pipeItem.getItem());
+								ItemStack overflow = transportPipesContainer.insertItem(pipeItem.getMovingDir(),
+										pipeItem.getItem());
 								if (overflow != null) {
 									// Send overflow items back into the pipe the way they came
 									pipeItem.getItem().setAmount(overflow.getAmount());
@@ -276,13 +291,11 @@ public class Pipe extends Duct {
 									pipeManager.spawnPipeItem(pipeItem);
 									this.putPipeItem(pipeItem);
 								}
-							}
-							else {
+							} else {
 								unloadedItems.add(pipeItem);
 							}
 						});
-					}
-					else {
+					} else {
 						// Send items that hit a dead end back into the pipe the way they came
 						pipeItem.setMovingDir(pipeItem.getMovingDir().getOpposite());
 						pipeItem.setBlockLoc(this.getBlockLoc());
@@ -304,63 +317,69 @@ public class Pipe extends Duct {
 
 		PipeManager pipeManager = (PipeManager) ductManager;
 
-		// put one of the unloaded items into the container block it belongs to or drop it if there is no longer a
+		// put one of the unloaded items into the container block it belongs to or drop
+		// it if there is no longer a
 		// container
-        if (!getUnloadedItems().isEmpty()) {
-            PipeItem unloadedItem = getUnloadedItems().getLast();
-            TransportPipesContainer newContainer = pipeManager.getContainerAtLoc(getWorld(), unloadedItem.getBlockLoc());
-            if (newContainer != null && newContainer.isInLoadedChunk()) {
-                ItemStack overflow = newContainer.insertItem(unloadedItem.getMovingDir(), unloadedItem.getItem());
-                getUnloadedItems().removeLast();
-                if (overflow != null) {
-                    getWorld().dropItem(getBlockLoc().toLocation(getWorld()), overflow);
-                }
-            }
-            else if (newContainer == null && !(globalDuctManager.getDuctAtLoc(getWorld(), unloadedItem.getBlockLoc()) instanceof Pipe)) {
-                // nothing there
-                getWorld().dropItem(getBlockLoc().toLocation(getWorld()), unloadedItem.getItem());
-                getUnloadedItems().removeLast();
-            }
-        }
+		if (!getUnloadedItems().isEmpty()) {
+			PipeItem unloadedItem = getUnloadedItems().getLast();
+			TransportPipesContainer newContainer = pipeManager.getContainerAtLoc(getWorld(),
+					unloadedItem.getBlockLoc());
+			if (newContainer != null && newContainer.isInLoadedChunk()) {
+				ItemStack overflow = newContainer.insertItem(unloadedItem.getMovingDir(), unloadedItem.getItem());
+				getUnloadedItems().removeLast();
+				if (overflow != null) {
+					getWorld().dropItem(getBlockLoc().toLocation(getWorld()), overflow);
+				}
+			} else if (newContainer == null
+					&& !(globalDuctManager.getDuctAtLoc(getWorld(), unloadedItem.getBlockLoc()) instanceof Pipe)) {
+				// nothing there
+				getWorld().dropItem(getBlockLoc().toLocation(getWorld()), unloadedItem.getItem());
+				getUnloadedItems().removeLast();
+			}
+		}
 
 	}
 
 	/**
-	 * can be overridden to calculate how a pipeItem which arrives at the middle of the pipe should be split and in
-	 * which directions these parts should go. Return null to fully remove the pipeItem and return an empty map to
+	 * can be overridden to calculate how a pipeItem which arrives at the middle of
+	 * the pipe should be split and in
+	 * which directions these parts should go. Return null to fully remove the
+	 * pipeItem and return an empty map to
 	 * fully remove the item and additionally drop it in the world.
 	 */
-	protected Map<TPDirection, Integer> calculateItemDistribution(PipeItem pipeItem, TPDirection movingDir, List<TPDirection> dirs, TransportPipes transportPipes) {
+	protected Map<TPDirection, Integer> calculateItemDistribution(PipeItem pipeItem, TPDirection movingDir,
+			List<TPDirection> dirs, TransportPipes transportPipes) {
 		Map<TPDirection, Integer> absWeights = new HashMap<>();
 		dirs.stream().filter(dir -> !dir.equals(movingDir.getOpposite())).forEach(dir -> absWeights.put(dir, 1));
 		return itemDistributor.splitPipeItem(pipeItem, absWeights, this);
 	}
 
 	@Override
-	public List<ItemStack> destroyed(TransportPipes transportPipes, DuctManager<? extends Duct> ductManager, Player destroyer) {
+	public List<ItemStack> destroyed(TransportPipes transportPipes, DuctManager<? extends Duct> ductManager,
+			Player destroyer) {
 		List<ItemStack> dropItems = super.destroyed(transportPipes, ductManager, destroyer);
 
-        items.forEach(pipeItem -> {
-            ((PipeManager) ductManager).despawnPipeItem(pipeItem);
-            if (destroyer != null) {
-            	dropItems.add(pipeItem.getItem());
-			}
-        });
-        items.clear();
-        futureItems.forEach(pipeItem -> {
-            ((PipeManager) ductManager).despawnPipeItem(pipeItem);
+		items.forEach(pipeItem -> {
+			((PipeManager) ductManager).despawnPipeItem(pipeItem);
 			if (destroyer != null) {
 				dropItems.add(pipeItem.getItem());
 			}
-        });
-        futureItems.clear();
-        unloadedItems.forEach(pipeItem -> {
-            ((PipeManager) ductManager).despawnPipeItem(pipeItem);
+		});
+		items.clear();
+		futureItems.forEach(pipeItem -> {
+			((PipeManager) ductManager).despawnPipeItem(pipeItem);
 			if (destroyer != null) {
 				dropItems.add(pipeItem.getItem());
 			}
-        });
-        unloadedItems.clear();
+		});
+		futureItems.clear();
+		unloadedItems.forEach(pipeItem -> {
+			((PipeManager) ductManager).despawnPipeItem(pipeItem);
+			if (destroyer != null) {
+				dropItems.add(pipeItem.getItem());
+			}
+		});
+		unloadedItems.clear();
 
 		return dropItems;
 	}
