@@ -7,9 +7,12 @@ import org.bukkit.plugin.Plugin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,7 +40,12 @@ public class Conf {
             if (Files.isRegularFile(finalConfigFile)) {
                 YamlConfiguration oldConf = YamlConfiguration.loadConfiguration(finalConfigFile.toFile());
                 valuesBefore.putAll(oldConf.getValues(true));
-                Files.delete(finalConfigFile);
+                try {
+                    Files.delete(finalConfigFile);
+                }
+                catch(NoSuchFileException e) {
+                    Bukkit.getLogger().log(Level.SEVERE, "Unable to delete file " + finalConfigPath);
+                }
             }
 
             InputStream is = configPlugin.getResource(jarConfigName);
@@ -47,8 +55,8 @@ public class Conf {
                 Bukkit.getLogger().log(Level.SEVERE, "InputStream is null for config " + jarConfigName + ".");
                 Bukkit.getLogger().log(Level.SEVERE, "Unable to copy bytes to " + finalConfigFile + ".");
             }
-            else{
-                Files.copy(is, finalConfigFile);
+            else {
+                Files.copy(is, finalConfigFile, StandardCopyOption.REPLACE_EXISTING);
             }
 
             YamlConfiguration newConf = YamlConfiguration.loadConfiguration(finalConfigFile.toFile());
