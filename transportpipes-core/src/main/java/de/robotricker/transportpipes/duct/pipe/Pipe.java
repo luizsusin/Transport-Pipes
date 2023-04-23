@@ -171,13 +171,17 @@ public class Pipe extends Duct {
 				// calculate possible moving directions
 				List<TPDirection> possibleMovingDirs = new ArrayList<>(getAllConnections());
 
-				Map<TPDirection, Integer> distribution = calculateItemDistribution(pipeItem, pipeItem.getMovingDir(), possibleMovingDirs, transportPipes);
+				Map<TPDirection, Integer> distribution = null;
+
+				try {
+					distribution = calculateItemDistribution(pipeItem, pipeItem.getMovingDir(), possibleMovingDirs, transportPipes);
+				}
+				catch(ConcurrentModificationException e) { }
 
 				if (distribution == null || distribution.isEmpty()) {
 					if (distribution != null) {
 						transportPipes.runTaskSync(() -> {
-
-                            pipeItem.removeMovedDir(getBlockLoc());
+							pipeItem.removeMovedDir(getBlockLoc());
                             Map<TPDirection, Integer> newDistribution = calculateItemDistribution(pipeItem, pipeItem.getMovingDir(), possibleMovingDirs, transportPipes);
                             if (newDistribution.isEmpty()) {
                                 pipeItem.setMovingDir(pipeItem.getMovingDir().getOpposite());
