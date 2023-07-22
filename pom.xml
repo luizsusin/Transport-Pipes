@@ -5,7 +5,7 @@
 
     <groupId>de.robotricker</groupId>
     <artifactId>transportpipes-parent</artifactId>
-    <version>5.4.5-SNAPSHOT</version>
+    <version>5.4.6-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>TransportPipes</name>
@@ -21,6 +21,7 @@
         <module>transportpipes-1_19</module>
         <module>transportpipes-1_19_3</module>
         <module>transportpipes-1_19_4</module>
+        <module>transportpipes-1_20</module>
         <module>transportpipes-dist</module>
     </modules>
 

@@ -10,7 +10,7 @@
     <parent>
         <groupId>de.robotricker</groupId>
         <artifactId>transportpipes-parent</artifactId>
-        <version>5.4.5-SNAPSHOT</version>
+        <version>5.4.6-SNAPSHOT</version>
     </parent>
 
     <build>

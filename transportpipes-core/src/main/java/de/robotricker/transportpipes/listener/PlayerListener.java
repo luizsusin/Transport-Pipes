@@ -1,5 +1,6 @@
 package de.robotricker.transportpipes.listener;
 
+import de.robotricker.transportpipes.PlayerSettingsService;
 import de.robotricker.transportpipes.config.GeneralConf;
 import de.robotricker.transportpipes.duct.Duct;
 import de.robotricker.transportpipes.duct.DuctRegister;
@@ -39,11 +40,15 @@ public class PlayerListener implements Listener {
 
     @Inject
     private GeneralConf generalConf;
+    
+    @Inject
+    private PlayerSettingsService playerSettingsService;
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
-        globalDuctManager.getPlayerDucts(e.getPlayer()).clear();
-        ((PipeManager) (DuctManager<? extends Duct>) ductRegister.baseDuctTypeOf("pipe").getDuctManager()).getPlayerPipeItems(e.getPlayer()).clear();
+        globalDuctManager.clearPlayerDucts(e.getPlayer());
+        ((PipeManager) (DuctManager<? extends Duct>) ductRegister.baseDuctTypeOf("pipe").getDuctManager()).clearPlayerPipeItems(e.getPlayer());
+        playerSettingsService.clearSettingsConf(e.getPlayer());
     }
 
     @EventHandler

@@ -27,5 +27,9 @@ public class PlayerSettingsService {
         }
         return cachedSettingsConfs.get(p);
     }
+    
+    public void clearSettingsConf(Player p) {
+    	cachedSettingsConfs.remove(p);
+    }
 
 }

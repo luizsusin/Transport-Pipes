@@ -1,5 +1,5 @@
 name: TransportPipes
-version: 5.4.3
+version: ${project.version}
 authors: [RoboTricker, BlackBeltPanda]
 main: ${project.groupId}.transportpipes.${project.parent.name}
 depend: [ProtocolLib]

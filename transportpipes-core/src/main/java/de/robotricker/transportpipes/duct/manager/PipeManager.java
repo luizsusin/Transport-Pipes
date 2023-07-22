@@ -223,6 +223,10 @@ public class PipeManager extends DuctManager<Pipe> {
     public Set<PipeItem> getPlayerPipeItems(Player player) {
         return playerItems.computeIfAbsent(player, p -> ConcurrentHashMap.newKeySet());
     }
+    
+    public void clearPlayerPipeItems(Player player) {
+    	playerItems.remove(player);
+    }
 
     public void spawnPipeItem(PipeItem pipeItem) {
         List<Player> playerList = WorldUtils.getPlayerList(pipeItem.getWorld());

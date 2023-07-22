@@ -71,6 +71,10 @@ public class GlobalDuctManager {
     public Set<Duct> getPlayerDucts(Player player) {
         return playerDucts.computeIfAbsent(player, p -> ConcurrentHashMap.newKeySet());
     }
+    
+    public void clearPlayerDucts(Player player) {
+    	playerDucts.remove(player);
+    }
 
     public RenderSystem getPlayerRenderSystem(Player player, BaseDuctType<? extends Duct> baseDuctType) {
         PlayerSettingsConf conf = playerSettingsService.getOrCreateSettingsConf(player);
